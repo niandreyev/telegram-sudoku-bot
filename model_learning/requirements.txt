@@ -1,0 +1,6 @@
+scikit-learn==1.0.2
+tensorflow==2.11.0
+numpy==1.21.1
+Pillow==9.0.1
+minio==7.1.12
+pydantic==1.9.0
