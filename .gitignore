@@ -5,3 +5,5 @@ __pycache__
 minio/
 .*_env
 *.ipynb
+*.pem
+aws*

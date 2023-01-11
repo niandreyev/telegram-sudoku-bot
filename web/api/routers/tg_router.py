@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request, Response
 from httpx import AsyncClient, Timeout
 from web.api.src.message_parser import DoPipelineTelegramAPIObject
 from web.api.src.minio_handler import MinioHandler
@@ -23,6 +23,19 @@ async def send_sudoku(chat_id: str, text: str):
     TG_API_URL = f"{settings.TG_URL}/{settings.TG_TOKEN}"
     async with AsyncClient(timeout=Timeout(settings.TG_API_TIMEOUT, read=None)) as client:
         await client.post(f"{TG_API_URL}/sendMessage", params={"chat_id": chat_id, "text": text})
+
+
+@router.post("/tg_webhook")
+async def webhook(request: Request):
+    TG_API_URL = f"{settings.TG_URL}/{settings.TG_TOKEN}"
+    data = await request.json()
+
+    async with AsyncClient(timeout=Timeout(settings.TG_API_TIMEOUT, read=None)) as client:
+        pipeline = DoPipelineTelegramAPIObject(client, settings)
+        status = await pipeline.do_pipeline(data)
+        msg_params = {"chat_id": status["chat_id"], "text": status["parse_msg"]}
+        await client.post(url=f"{TG_API_URL}/sendMessage", params=msg_params)
+    return Response(status_code=200)
 
 
 @router.get("/parse_last_message")
