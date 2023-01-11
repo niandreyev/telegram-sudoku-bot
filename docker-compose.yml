@@ -1,0 +1,93 @@
+version: "3"
+services:
+  zookeeper:
+    image: "bitnami/zookeeper:3.6.4"
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    restart: always
+    networks:
+      - local
+  kafka:
+    image: "bitnami/kafka:3.3.1"
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    restart: always
+    networks:
+      - local
+    depends_on:
+      zookeeper:
+        condition: service_started
+  minio:
+    image: "bitnami/minio:2022.12.12"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    env_file: .minio_env
+    networks:
+      - local
+  web:
+    build:
+      context: ./
+      dockerfile: ./web/Dockerfile
+    env_file: .web_env
+    ports:
+      - "8000:8000"
+    command: uvicorn web.main:app --reload --host 0.0.0.0 --log-config web/logging.yaml
+    networks:
+      - local
+    depends_on:
+      kafka:
+        condition: service_started
+      model_learning:
+        condition: service_completed_successfully
+  model_learning:
+    build:
+      context: ./
+      dockerfile: ./model_learning/Dockerfile
+    env_file: .learn_env
+    command: python learn.py
+    networks:
+      - local
+    depends_on:
+      kafka:
+        condition: service_started
+      minio:
+        condition: service_started
+  image_parser:
+    build:
+      context: ./
+      dockerfile: ./image_parser/Dockerfile
+    env_file: .ocr_env
+    command: python main.py
+    networks:
+      - local
+    depends_on:
+      kafka:
+        condition: service_started
+      minio:
+        condition: service_started
+      model_learning:
+        condition: service_completed_successfully
+  sudoku_solver:
+    build:
+      context: ./
+      dockerfile: ./sudoku_solver/Dockerfile
+    env_file: .sudoku_env
+    command: python main.py
+    networks:
+      - local
+    depends_on:
+      kafka:
+        condition: service_started
+      minio:
+        condition: service_started
+      model_learning:
+        condition: service_completed_successfully
+networks:
+  local:
+    driver: bridge

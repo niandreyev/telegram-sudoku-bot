@@ -1,0 +1,6 @@
+minio==7.1.12
+pydantic==1.9.0
+sudokum==0.0.1
+matplotlib==3.5.1
+kafka-python==2.0.2
+requests==2.27.1
