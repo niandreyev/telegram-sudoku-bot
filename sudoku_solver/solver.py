@@ -48,6 +48,8 @@ class SudokuSolvePipeline:
         for row in sudoku:
             row_counter = Counter(row)
             row_counter.pop(0)
+            if len(row_counter) == 0:
+                continue
             if row_counter.most_common()[0][1] > 1:
                 print("Not valid - row duplicate")
                 return False
@@ -55,6 +57,8 @@ class SudokuSolvePipeline:
             col = [row[col_idx] for row in sudoku]
             col_counter = Counter(col)
             col_counter.pop(0)
+            if len(col_counter) == 0:
+                continue
             if col_counter.most_common()[0][1] > 1:
                 print("Not valid - col duplicate")
                 return False
