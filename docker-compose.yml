@@ -45,6 +45,17 @@ services:
         condition: service_started
       model_learning:
         condition: service_completed_successfully
+  message_waiter:
+    build:
+      context: ./
+      dockerfile: ./message_waiter/Dockerfile
+    env_file: .waiter_env
+    command: python main.py
+    networks:
+      - local
+    depends_on:
+      web:
+        condition: service_started
   model_learning:
     build:
       context: ./
