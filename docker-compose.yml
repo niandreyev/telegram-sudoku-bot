@@ -28,6 +28,7 @@ services:
       - "9000:9000"
       - "9001:9001"
     env_file: .minio_env
+    restart: always
     networks:
       - local
   web:
@@ -38,6 +39,7 @@ services:
     ports:
       - "8000:8000"
     command: uvicorn web.main:app --reload --host 0.0.0.0 --log-config web/logging.yaml
+    restart: always
     networks:
       - local
     depends_on:
@@ -51,6 +53,7 @@ services:
       dockerfile: ./message_waiter/Dockerfile
     env_file: .waiter_env
     command: python main.py
+    restart: always
     networks:
       - local
     depends_on:
@@ -75,6 +78,7 @@ services:
       dockerfile: ./image_parser/Dockerfile
     env_file: .ocr_env
     command: python main.py
+    restart: always
     networks:
       - local
     depends_on:
@@ -90,6 +94,7 @@ services:
       dockerfile: ./sudoku_solver/Dockerfile
     env_file: .sudoku_env
     command: python main.py
+    restart: always
     networks:
       - local
     depends_on:
